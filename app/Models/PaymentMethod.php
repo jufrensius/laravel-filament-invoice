@@ -17,4 +17,9 @@ class PaymentMethod extends Model
         'account_number',
         'description',
     ];
+
+    public function customer_order()
+    {
+        return $this->hasMany(CustomerOrder::class);
+    }
 }

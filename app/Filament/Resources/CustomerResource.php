@@ -12,6 +12,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
@@ -22,6 +24,7 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class CustomerResource extends Resource
 {
@@ -34,31 +37,80 @@ class CustomerResource extends Resource
     {
         return $form
             ->schema([
-                Section::make('Contact')
+                Grid::make(12)
                     ->schema([
-                        TextInput::make('name')
-                            ->required(),
-                        TextInput::make('email')
-                            ->required()
-                            ->email(),
-                        Grid::make(2)
+                        Section::make('customer')
                             ->schema([
-                                TextInput::make('phone_number')
-                                    ->tel(),
-                                TextInput::make('mobile_phone_number')
-                                    ->required()
-                                    ->tel(),
-                            ]),
+                                Wizard::make()
+                                    ->schema([
+                                        Step::make('contact')
+                                            ->schema([
+                                                TextInput::make('name')
+                                                    ->required(),
+                                                TextInput::make('email')
+                                                    ->required()
+                                                    ->email(),
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextInput::make('phone_number')
+                                                            ->tel(),
+                                                        TextInput::make('mobile_phone_number')
+                                                            ->required()
+                                                            ->tel(),
+                                                    ]),
+                                            ]),
+                                        Step::make('address')
+                                            ->schema([
+                                                Textarea::make('street'),
+                                                TextInput::make('state'),
+                                                TextInput::make('city'),
+                                                TextInput::make('postal_code'),
+                                            ]),
+                                    ]),
+                            ])
+                            ->columnSpan(8),
+                        Grid::make(12)
+                            ->schema([
+                                Section::make('Customer Categories')
+                                    ->schema([
+                                        Select::make('customer_categories')
+                                            ->label('Categories')
+                                            ->multiple()
+                                            ->relationship('customer_categories', 'name')
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->required()
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        $set('slug', Str::slug($state));
+                                                    }),
+                                                TextInput::make('slug'),
+                                                Select::make('parent_customer_category_id')
+                                                    ->label('Parent')
+                                                    ->relationship('parent', 'name')
+                                                    ->searchable(),
+                                            ]),
+                                    ]),
+                                Section::make('Customer Tags')
+                                    ->schema([
+                                        Select::make('customer_tags')
+                                            ->label('Tags')
+                                            ->multiple()
+                                            ->relationship('customer_tags', 'name')
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->unique('customer_tags', 'name')
+                                                    ->placeholder(__('Enter tags'))
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        $set('slug', Str::slug($state));
+                                                    }),
+                                                TextInput::make('slug'),
+                                            ]),
+                                    ]),
+                            ])
+                            ->columnSpan(4),
                     ]),
-                Section::make('Address')
-                    ->schema([
-                        Textarea::make('street'),
-                        TextInput::make('state'),
-                        TextInput::make('city'),
-                        TextInput::make('postal_code'),
-                    ])
-                    ->collapsed()
-                    ->collapsible(),
             ]);
     }
 
@@ -79,6 +131,12 @@ class CustomerResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('mobile_phone_number')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('customer_categories.name')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('customer_tags.name')
                     ->searchable()
                     ->toggleable(),
             ])

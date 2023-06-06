@@ -20,4 +20,9 @@ class CompanyCategory extends Model
     {
         return $this->belongsTo(CompanyCategory::class, 'company_category_id');
     }
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'company_company_category');
+    }
 }

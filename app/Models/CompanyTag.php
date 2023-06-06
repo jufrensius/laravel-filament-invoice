@@ -14,4 +14,9 @@ class CompanyTag extends Model
         'name',
         'slug',
     ];
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'company_company_tag');
+    }
 }

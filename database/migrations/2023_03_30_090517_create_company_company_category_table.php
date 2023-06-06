@@ -14,7 +14,6 @@ class CreateCompanyCompanyCategoryTable extends Migration
     public function up()
     {
         Schema::create('company_company_category', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('company_id')
                 ->constrained()
                 ->cascadeOnUpdate()
@@ -24,7 +23,6 @@ class CreateCompanyCompanyCategoryTable extends Migration
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->timestamps();
         });
     }
 

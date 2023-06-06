@@ -15,8 +15,7 @@
         "jeffgreco13/filament-breezy": "^1.5",
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
-        "laravel/tinker": "^2.5",
-        "mohamedsabil83/filament-forms-tinyeditor": "^1.7"
+        "laravel/tinker": "^2.5"
     },
     "require-dev": {
         "doctrine/dbal": "^3.6",

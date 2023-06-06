@@ -6,6 +6,7 @@ use App\Filament\Resources\CustomerOrderResource\Pages;
 use App\Filament\Resources\CustomerOrderResource\RelationManagers;
 use App\Models\Customer;
 use App\Models\CustomerOrder;
+use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Status;
@@ -18,6 +19,7 @@ use Filament\Forms\Components\{
     Grid,
     Placeholder,
     Repeater,
+    Section,
     Select,
     Textarea,
     TextInput
@@ -40,128 +42,177 @@ class CustomerOrderResource extends Resource
     {
         return $form
             ->schema([
-                Card::make()
+                Grid::make(12)
                     ->schema([
-                        TextInput::make('invoice_number')
-                            ->default(static::getNextInvoiceNumber()),
-                        Grid::make(2)
+                        Section::make('Billing to')
                             ->schema([
-                                Select::make('customers')
-                                    ->label('Customer')
-                                    ->required()
-                                    // ->options(Customer::all()->pluck('name', 'id'))
-                                    // ->relationship('customers', 'name')
-                                    // ->multiple()
-                                    ->options(
-                                        Customer::all()->pluck('name', 'id'),
-                                    )
-                                    ->searchable()
-                                    ->createOptionForm([
-                                        TextInput::make('name')
-                                            ->required(),
-                                        TextInput::make('email')
+                                Card::make()
+                                    ->schema([
+                                        TextInput::make('invoice_number')
+                                            ->default(static::getNextInvoiceNumber()),
+                                        Select::make('customers')
+                                            ->relationship('customers', 'name')
+                                            ->label('Customer')
                                             ->required()
-                                            ->email(),
-                                        TextInput::make('phone_number')
-                                            ->tel(),
-                                        TextInput::make('mobile_phone_number')
-                                            ->required()
-                                            ->tel(),
+                                            // ->options(
+                                            //     Customer::all()->pluck('name', 'id'),
+                                            // )
+                                            ->searchable()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->required(),
+                                                TextInput::make('email')
+                                                    ->required()
+                                                    ->email(),
+                                                TextInput::make('phone_number')
+                                                    ->tel(),
+                                                TextInput::make('mobile_phone_number')
+                                                    ->required()
+                                                    ->tel(),
+                                            ]),
                                     ]),
-                                DatePicker::make('due_date')
-                                    ->required(),
-                                Select::make('payment_method_id')
-                                    ->label('Payment Method')
-                                    ->required()
-                                    ->relationship('payment_methods', 'bank_name'),
+                            ])
+                            ->columnSpan(8),
+                        Card::make()
+                            ->schema([
                                 Select::make('status_id')
                                     ->required()
                                     ->label('Status')
                                     ->options(Status::all()->pluck('name', 'id'))
                                     ->searchable(),
-                            ]),
-                        Repeater::make('orders')
+                                DatePicker::make('due_date')
+                                    ->required(),
+                                Select::make('payment_method_id')
+                                    ->label('Payment Method')
+                                    ->required()
+                                    ->relationship('payment_method', 'bank_name'),
+                            ])
+                            ->columnSpan(4),
+                        Section::make('Orders')
                             ->schema([
-                                Select::make('product_id')
-                                    ->required()
-                                    ->label('Product')
-                                    ->options(Product::all()->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $product = Product::find($state);
-                                        $set('unit_price', $product->unit_price);
-                                        $set('amount', $product->amount);
+                                Repeater::make('orders')
+                                    // ->relationship()
+                                    ->schema([
+                                        Select::make('product_id')
+                                            ->required()
+                                            ->label('Product')
+                                            ->options(Product::all()->pluck('name', 'id'))
+                                            ->searchable()
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                                $product = Product::find($state);
+                                                $quantity = $get('quantity');
+
+                                                $set('unit_price', $product->unit_price);
+
+                                                $amount = ($product->unit_price * $quantity);
+                                                $set('amount', $amount);
+                                            }),
+                                        TextInput::make('unit_price')
+                                            ->numeric()
+                                            ->reactive(),
+                                        TextInput::make('quantity')
+                                            ->required()
+                                            ->numeric()
+                                            ->default(1)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                                $unitPrice = $get('unit_price');
+                                                $quantity = $state;
+
+                                                $amount = ($unitPrice * $quantity);
+                                                $set('amount', $amount);
+                                            }),
+                                        TextInput::make('discount')
+                                            ->required()
+                                            ->numeric()
+                                            ->default(0)
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                                $unitPrice = $get('unit_price');
+                                                $quantity = $get('quantity');
+                                                $discount = $state;
+
+                                                $amount = ($unitPrice * $quantity) - $discount;
+                                                $set('amount', $amount);
+                                            }),
+                                        TextInput::make('amount')
+                                            ->reactive()
+                                            ->numeric()
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->defaultItems(1)
+                                    ->columnSpanFull()
+                                    ->columns(2)
+                                    ->label('Order')
+                                    ->createItemButtonLabel('Add Order'),
+                            ])
+                            ->columnSpan(12),
+                        Section::make('Total')
+                            ->schema([
+                                Placeholder::make('sub_total')
+                                    ->label('Sub Total')
+                                    ->content(function (callable $get, $set) {
+                                        $subtotal = collect($get('orders'))->pluck('amount')->sum();
+                                        return $subtotal ?? 0;
                                     }),
-                                TextInput::make('unit_price')
-                                    ->numeric()
-                                    ->reactive(),
-                                TextInput::make('quantity')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(1)
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $unitPrice = $get('unit_price');
-                                        $quantity = $state;
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('discount')
+                                            ->required()
+                                            ->numeric()
+                                            ->default(0)
+                                            ->suffix('%')
+                                            ->reactive(),
+                                        TextInput::make('tax')
+                                            ->required()
+                                            ->numeric()
+                                            ->default(0)
+                                            ->reactive(),
+                                    ]),
+                                Placeholder::make('grand_total')
+                                    ->label('Grand Total')
+                                    ->content(function (callable $get, $set) {
+                                        $subtotal = collect($get('orders'))->pluck('amount')->sum();
                                         $discount = $get('discount');
+                                        $tax = $get('tax');
+                                        $subtotal = intval($subtotal);
+                                        $discount = intval($discount);
+                                        $tax = intval($tax);
 
-                                        $amount = ($unitPrice * $quantity) - $discount;
-                                        $set('amount', $amount);
-                                    }),
-                                TextInput::make('discount')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(0)
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $unitPrice = $get('unit_price');
-                                        $quantity = $get('quantity');
-                                        $discount = $state;
+                                        $grandTotal = $subtotal - ($subtotal * ($discount / 100)) + ($subtotal - ($subtotal * ($discount / 100))) * ($tax / 100);
 
-                                        $amount = ($unitPrice * $quantity) - $discount;
-                                        $set('amount', $amount);
+                                        return $grandTotal;
                                     }),
-                                TextInput::make('amount')
-                                    ->reactive()
-                                    ->numeric()
+                                Textarea::make('note')
+                                    ->maxLength(65535)
                                     ->columnSpanFull(),
                             ])
-                            ->defaultItems(1)
-                            ->columnSpanFull()
-                            ->columns(2)
-                            ->label('Order')
-                            ->createItemButtonLabel('Add Order'),
-                        Placeholder::make('subtotal')
-                            ->label('Sub Total')
-                            ->content(function ($get) {
-                                return collect($get('order_id'))
-                                    ->pluck('amount')
-                                    ->sum();
-                            }),
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('discount')
-                                    ->required()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $subtotal = $get('subtotal');
-                                        $discount = $state / 100 * $subtotal;
-                                        $grandTotal = $subtotal - $discount;
-                                        $tax = $get('tax', 0);
-                                        $grandTotal += $grandTotal * $tax / 100;
-
-                                        $set('grand_total', $grandTotal);
-                                    }),
-                                TextInput::make('tax')
-                                    ->required(),
-                            ]),
-                        Placeholder::make('grand_total')
-                            ->label('Grand Total'),
-                        Textarea::make('note')
-                            ->maxLength(65535)
-                            ->columnSpanFull(),
+                            ->columnSpan(12),
                     ]),
             ]);
+    }
+
+    public function save($model, Form $form)
+    {
+        // Save the parent model
+        parent::save($model, $form);
+
+        // Save the orders
+        $orders = $form->getColumns('orders');
+        foreach ($orders as $orderData) {
+            // Create a new Order model
+            $order = new Order([
+                'product_id' => $orderData['product_id'],
+                'unit_price' => $orderData['unit_price'],
+                'quantity' => $orderData['quantity'],
+                'amount' => $orderData['amount'],
+            ]);
+            $order->save();
+
+            // Attach the Order model to the CustomerOrder model
+            $model->orders()->save($order);
+        }
     }
 
 
@@ -176,7 +227,7 @@ class CustomerOrderResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')
                     ->date(),
                 Tables\Columns\TextColumn::make('discount'),
-                Tables\Columns\TextColumn::make('subtotal'),
+                Tables\Columns\TextColumn::make('sub_total'),
                 Tables\Columns\TextColumn::make('tax'),
                 Tables\Columns\TextColumn::make('grand_total'),
                 Tables\Columns\TextColumn::make('note'),
@@ -228,8 +279,7 @@ class CustomerOrderResource extends Resource
 
     public static function getNextInvoiceNumber()
     {
-        $lastId = CustomerOrder::orderBy('id')->value('id');
-
+        $lastId = CustomerOrder::latest()->value('id');
         $nextInvoiceNumber = 'INV-' . date('Y-m-d') . '/' . $lastId + 1;
 
         return $nextInvoiceNumber;

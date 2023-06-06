@@ -16,6 +16,7 @@ class CreateCompanyTagsTable extends Migration
         Schema::create('company_tags', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
             $table->timestamps();
             $table->softDeletes();
         });

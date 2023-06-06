@@ -10,9 +10,10 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
@@ -40,7 +41,6 @@ class PaymentMethodResource extends Resource
                 Card::make()
                     ->schema([
                         FileUpload::make('logo')
-                            ->required()
                             ->image()
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('16:9')
@@ -56,12 +56,21 @@ class PaymentMethodResource extends Resource
                                     ->maxLength(50),
                                 TextInput::make('account_number')
                                     ->required()
-                                    ->numeric()
+                                    // ->numeric()
                                     ->maxLength(16),
                             ]),
-                        TinyEditor::make('description')
-                            ->default([
-                                'undo', 'redo', '|', 'bold', 'italic', 'underline', '|', 'bullist', 'numlist', '|', 'link', 'unlink', '|', 'image'
+                        MarkdownEditor::make('description')
+                            ->toolbarButtons([
+                                'attachFiles',
+                                'bold',
+                                'bulletList',
+                                'codeBlock',
+                                'edit',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'preview',
+                                'strike',
                             ])
                             ->columnSpanFull(),
                     ]),

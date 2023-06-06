@@ -18,11 +18,11 @@ class Product extends Model
 
     public function product_categories()
     {
-        return $this->belongsToMany(ProductCategory::class, 'product_categories', 'product_id', 'product_category_id');
+        return $this->belongsToMany(ProductCategory::class, 'product_product_category');
     }
 
     public function product_tags()
     {
-        return $this->belongsToMany(ProductTag::class, 'product_tags', 'product_id', 'product_tag_id');
+        return $this->belongsToMany(ProductTag::class, 'product_product_tag');
     }
 }

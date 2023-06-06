@@ -52,9 +52,17 @@ class CustomerTagResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Tag'),
+                    ->label('Tag')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('slug')
                     ->label('Parent Tag'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->since(),
+                TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->since(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

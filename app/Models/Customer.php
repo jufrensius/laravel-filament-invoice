@@ -18,8 +18,24 @@ class Customer extends Model
         'company_id',
     ];
 
-    public function company()
+    public function customer_categories()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsToMany(CustomerCategory::class, 'customer_customer_category');
+    }
+
+    public function customer_tags()
+    {
+        return $this->belongsToMany(CustomerTag::class, 'customer_customer_tag');
+    }
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'company_customer')
+            ->withPivot('position');
+    }
+
+    public function customer_orders()
+    {
+        return $this->hasMany(CustomerOrder::class);
     }
 }

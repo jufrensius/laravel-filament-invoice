@@ -20,6 +20,7 @@ class CreateStatusesTable extends Migration
                 ->nullable();
             $table->char('color', 7);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

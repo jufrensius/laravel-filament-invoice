@@ -16,6 +16,7 @@ class CreateCompanyCategoriesTable extends Migration
         Schema::create('company_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
             $table->foreignId('company_category_id')
                 ->nullable()
                 ->constrained()

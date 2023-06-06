@@ -60,6 +60,12 @@ class CompanyTagResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->since(),
+                TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->since(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

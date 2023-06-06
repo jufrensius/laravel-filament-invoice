@@ -14,17 +14,15 @@ class CreateCustomerCustomerCategoryTable extends Migration
     public function up()
     {
         Schema::create('customer_customer_category', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('customer_id')
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            $table->foreignId('customer_tag_id')
+            $table->foreignId('customer_category_id')
                 ->nullable()
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->timestamps();
         });
     }
 

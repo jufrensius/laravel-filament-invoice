@@ -12,6 +12,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
@@ -22,6 +24,7 @@ use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class CompanyResource extends Resource
 {
@@ -34,57 +37,113 @@ class CompanyResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make(5)
+                Grid::make(12)
                     ->schema([
-                        Section::make('Contact')
+                        Section::make('company')
                             ->schema([
-                                FileUpload::make('logo')
-                                    ->image()
-                                    ->imageResizeMode('cover')
-                                    ->imageCropAspectRatio('16:9')
-                                    ->imageResizeTargetWidth('1920')
-                                    ->imageResizeTargetHeight('1080'),
-                                TextInput::make('name')
-                                    ->required(),
-                                TextInput::make('email')
-                                    ->required()
-                                    ->email(),
-                                Grid::make(2)
+                                Card::make()
                                     ->schema([
-                                        TextInput::make('phone_number')
-                                            ->required()
-                                            ->tel(),
-                                        TextInput::make('mobile_phone_number')
-                                            ->required()
-                                            ->tel(),
+                                        Wizard::make()
+                                            ->schema([
+                                                Step::make('General')
+                                                    ->schema([
+                                                        FileUpload::make('logo')
+                                                            ->image()
+                                                            ->imageResizeMode('cover')
+                                                            ->imageCropAspectRatio('16:9')
+                                                            ->imageResizeTargetWidth('1920')
+                                                            ->imageResizeTargetHeight('1080'),
+                                                        TextInput::make('name')
+                                                            ->required(),
+                                                    ]),
+                                                Step::make('Contact')
+                                                    ->schema([
+                                                        TextInput::make('email')
+                                                            ->required()
+                                                            ->email(),
+                                                        Grid::make(2)
+                                                            ->schema([
+                                                                TextInput::make('phone_number')
+                                                                    ->required()
+                                                                    ->tel(),
+                                                                TextInput::make('mobile_phone_number')
+                                                                    ->required()
+                                                                    ->tel(),
+                                                            ]),
+                                                    ]),
+                                                Step::make('Address')
+                                                    ->schema([
+                                                        Textarea::make('street'),
+                                                        TextInput::make('state'),
+                                                        TextInput::make('city'),
+                                                        TextInput::make('postal_code'),
+                                                    ]),
+                                                Step::make('Contact Person')
+                                                    ->schema([
+                                                        Select::make('customers')
+                                                            ->label('Customer')
+                                                            ->multiple()
+                                                            ->relationship('customers', 'name')
+                                                            ->createOptionForm([
+                                                                TextInput::make('name')
+                                                                    ->required(),
+                                                                TextInput::make('email')
+                                                                    ->required()
+                                                                    ->email(),
+                                                                TextInput::make('phone_number')
+                                                                    ->tel()
+                                                                    ->nullable(),
+                                                                TextInput::make('mobile_phone_number')
+                                                                    ->required()
+                                                                    ->tel(),
+                                                                TextInput::make('position')
+                                                                    ->required(),
+                                                            ]),
+                                                    ]),
+                                            ]),
                                     ]),
-                                Textarea::make('street'),
-                                TextInput::make('state'),
-                                TextInput::make('city'),
-                                TextInput::make('postal_code'),
                             ])
-                            ->columnSpan(3),
-                        Card::make()
+                            ->columnSpan(8),
+                        Grid::make(12)
                             ->schema([
-                                Select::make('customers')
-                                    ->label('Customer')
-                                    ->multiple()
-                                    ->relationship('customers', 'name')
-                                    ->createOptionForm([
-                                        TextInput::make('name')
-                                            ->required(),
-                                        TextInput::make('email')
-                                            ->required()
-                                            ->email(),
-                                        TextInput::make('phone_number')
-                                            ->tel()
-                                            ->nullable(),
-                                        TextInput::make('mobile_phone_number')
-                                            ->required()
-                                            ->tel(),
+                                Section::make('Company Categories')
+                                    ->schema([
+                                        Select::make('company_categories')
+                                            ->label('Categories')
+                                            ->multiple()
+                                            ->relationship('company_categories', 'name')
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->required()
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        $set('slug', Str::slug($state));
+                                                    }),
+                                                TextInput::make('slug'),
+                                                Select::make('parent_company_category')
+                                                    ->label('Parent')
+                                                    ->relationship('parent', 'name')
+                                                    ->searchable(),
+                                            ]),
+                                    ]),
+                                Section::make('Company Tags')
+                                    ->schema([
+                                        Select::make('company_tags')
+                                            ->label('Tags')
+                                            ->multiple()
+                                            ->relationship('company_tags', 'name')
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->unique('company_tags', 'name')
+                                                    ->reactive()
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        $set('slug', Str::slug($state));
+                                                    }),
+                                                TextInput::make('slug'),
+                                            ]),
                                     ]),
                             ])
-                            ->columnSpan(2),
+                            ->columnSpan(4)
                     ]),
             ]);
     }

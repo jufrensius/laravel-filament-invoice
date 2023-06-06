@@ -14,7 +14,6 @@ class CreateCustomerCustomerTagTable extends Migration
     public function up()
     {
         Schema::create('customer_customer_tag', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('customer_id')
                 ->constrained()
                 ->cascadeOnUpdate()
@@ -24,7 +23,6 @@ class CreateCustomerCustomerTagTable extends Migration
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->timestamps();
         });
     }
 

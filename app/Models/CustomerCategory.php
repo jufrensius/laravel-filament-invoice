@@ -20,4 +20,9 @@ class CustomerCategory extends Model
     {
         return $this->belongsTo(CustomerCategory::class, 'customer_category_id');
     }
+
+    public function customers()
+    {
+        return $this->belongsToMany(Customer::class);
+    }
 }

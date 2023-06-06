@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class StatusResource extends Resource
 {
     protected static ?string $model = Status::class;
-    protected static ?string $navigationGroup = 'Settings';
     protected static ?string $modelLabel = 'Status';
+    protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
     protected static ?int $navigationSort = 3;
 
@@ -39,7 +39,6 @@ class StatusResource extends Resource
                         ColorPicker::make('color')
                             ->required(),
                         Textarea::make('description')
-                            ->required()
                             ->maxLength(255),
                     ]),
             ]);

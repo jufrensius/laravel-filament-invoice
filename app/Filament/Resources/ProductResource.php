@@ -114,8 +114,17 @@ class ProductResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('unit_price')
+                    ->money('idr')
                     ->sortable()
-                    ->money('idr'),
+                    ->toggleable(),
+                TextColumn::make('product_categories.name')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('product_tags.name')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

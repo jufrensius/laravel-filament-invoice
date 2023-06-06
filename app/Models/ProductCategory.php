@@ -22,6 +22,11 @@ class ProductCategory extends Model
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_product_category');
+    }
+
     public static function boot()
     {
         parent::boot();

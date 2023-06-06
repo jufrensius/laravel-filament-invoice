@@ -16,15 +16,13 @@ class CreateCustomerOrderTable extends Migration
         Schema::create('customer_order', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')
-                ->nullable()
                 ->constrained()
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->cascadeOnDelete();
             $table->foreignId('order_id')
-                ->nullable()
                 ->constrained()
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->cascadeOnDelete();
             $table->foreignId('status_id')
                 ->constrained()
                 ->cascadeOnUpdate()
@@ -34,11 +32,12 @@ class CreateCustomerOrderTable extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->date('due_date');
-            $table->decimal('discount', 2);
-            $table->decimal('sub_total', 14, 2);
-            $table->decimal('tax', 2);
-            $table->decimal('grand_total', 14, 2);
-            $table->longText('description');
+            $table->unsignedBigInteger('sub_total')->default(0);
+            $table->unsignedTinyInteger('discount');
+            $table->unsignedTinyInteger('tax');
+            $table->unsignedBigInteger('grand_total')->default(0);
+            $table->longText('description')
+                ->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

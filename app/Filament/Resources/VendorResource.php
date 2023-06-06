@@ -50,12 +50,12 @@ class VendorResource extends Resource
                         TextInput::make('name')
                             ->required()
                             ->maxLength(50),
-                        Grid::make(3)
+                        TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Grid::make(2)
                             ->schema([
-                                TextInput::make('email')
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255),
                                 TextInput::make('phone_number')
                                     ->tel()
                                     ->required()

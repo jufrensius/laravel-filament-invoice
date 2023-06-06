@@ -52,7 +52,24 @@ class CompanyCategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('slug')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('parent.name')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->since(),
+                TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->since(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

@@ -19,8 +19,19 @@ class Company extends Model
         'address'
     ];
 
+    public function company_categories()
+    {
+        return $this->belongsToMany(CompanyCategory::class, 'company_company_category');
+    }
+
+    public function company_tags()
+    {
+        return $this->belongsToMany(CompanyTag::class, 'company_company_tag');
+    }
+
     public function customers()
     {
-        return $this->belongsToMany(Customer::class);
+        return $this->belongsToMany(Customer::class, 'company_customer')
+            ->withPivot('position');
     }
 }

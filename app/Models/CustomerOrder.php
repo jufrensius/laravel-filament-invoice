@@ -18,23 +18,23 @@ class CustomerOrder extends Model
         'payment_method_id',
         'due_date',
         'discount',
-        'subtotal',
         'tax',
+        'sub_total',
         'grand_total',
         'description',
     ];
 
     public function customers()
     {
-        return $this->belongsToMany(Customer::class);
+        return $this->belongsTo(Customer::class);
     }
 
     public function orders()
     {
-        return $this->hasManyThrough(Product::class, Order::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function payment_methods()
+    public function payment_method()
     {
         return $this->belongsTo(PaymentMethod::class);
     }

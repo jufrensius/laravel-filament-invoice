@@ -14,7 +14,6 @@ class CreateCompanyCustomerTable extends Migration
     public function up()
     {
         Schema::create('company_customer', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('company_id')
                 ->nullable()
                 ->constrained()
@@ -25,9 +24,7 @@ class CreateCompanyCustomerTable extends Migration
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->string('position')
-                ->nullable();
-            $table->timestamps();
+            $table->string('position');
         });
     }
 
